@@ -1,6 +1,6 @@
 import { DeviceSessionEntity } from "../types/device-session.entity";
 import { DeviceSessionModel } from "../schemas/device-session.schema";
-import { injectable } from "inversify/lib/esm";
+import { injectable } from "inversify";
 
 @injectable()
 export class SessionDevicesRepository {

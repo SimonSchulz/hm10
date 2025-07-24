@@ -1,8 +1,7 @@
 import { DeviceSessionEntity } from "../types/device-session.entity";
 import { SessionDevicesRepository } from "../repositories/session-devices.repository";
 import { SessionDevicesQueryRepository } from "../repositories/session-query.repository";
-import { injectable } from "inversify/lib/esm";
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import TYPES from "../../../core/container/types";
 
 @injectable()

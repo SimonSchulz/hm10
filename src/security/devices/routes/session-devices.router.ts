@@ -1,12 +1,13 @@
 import { Router } from "express";
-
-import { DeviceSessionController } from "../controller/device-session.controller";
 import container from "../../../core/container/container";
 import { RefreshTokenGuard } from "../../../auth/routers/guards/refresh.token.guard";
 import TYPES from "../../../core/container/types";
+import { DeviceSessionController } from "../controller/device-session.controller";
 
 const router = Router();
-const controller = container.get(DeviceSessionController);
+const controller = container.get<DeviceSessionController>(
+  TYPES.DeviceSessionController,
+);
 const refreshTokenGuard = container.get<RefreshTokenGuard>(
   TYPES.RefreshTokenGuard,
 );

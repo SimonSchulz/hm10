@@ -6,8 +6,7 @@ import {
   ForbiddenError,
   NotFoundError,
 } from "../../../core/utils/app-response-errors";
-import { injectable } from "inversify/lib/esm";
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import TYPES from "../../../core/container/types";
 
 @injectable()

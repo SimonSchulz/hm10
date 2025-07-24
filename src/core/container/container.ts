@@ -13,6 +13,8 @@ import { RefreshTokenGuard } from "../../auth/routers/guards/refresh.token.guard
 import { UsersController } from "../../user/controller/user.controller";
 import { UsersService } from "../../user/domain/user.service";
 import { UsersQueryRepository } from "../../user/repositories/user.query.repository";
+import { AccessTokenGuard } from "../../auth/routers/guards/access.token.guard";
+import { AuthService } from "../../auth/domain/auth.service";
 
 const container = new Container();
 //auth
@@ -29,6 +31,8 @@ container
 container
   .bind<RefreshTokenGuard>(TYPES.RefreshTokenGuard)
   .to(RefreshTokenGuard);
+container.bind<AccessTokenGuard>(TYPES.AccessTokenGuard).to(AccessTokenGuard);
+container.bind<AuthService>(TYPES.AuthService).to(AuthService);
 //blogs
 
 //posts
@@ -43,9 +47,21 @@ container
   .bind<UsersQueryRepository>(TYPES.UsersQueryRepository)
   .to(UsersQueryRepository);
 //sessions
-container.bind(SessionDevicesRepository).toSelf().inSingletonScope();
-container.bind(SessionDevicesQueryRepository).toSelf().inSingletonScope();
-container.bind(SessionDevicesService).toSelf().inSingletonScope();
-container.bind(DeviceSessionController).toSelf().inSingletonScope();
+container
+  .bind<SessionDevicesRepository>(TYPES.SessionDevicesRepository)
+  .to(SessionDevicesRepository)
+  .inSingletonScope();
+container
+  .bind<SessionDevicesQueryRepository>(TYPES.SessionDevicesQueryRepository)
+  .to(SessionDevicesQueryRepository)
+  .inSingletonScope();
+container
+  .bind<SessionDevicesService>(TYPES.SessionDevicesService)
+  .to(SessionDevicesService)
+  .inSingletonScope();
+container
+  .bind<DeviceSessionController>(TYPES.DeviceSessionController)
+  .to(DeviceSessionController)
+  .inSingletonScope();
 
 export default container;
