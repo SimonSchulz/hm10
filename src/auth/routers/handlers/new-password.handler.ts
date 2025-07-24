@@ -27,7 +27,7 @@ export async function newPasswordHandler(
       });
       return;
     }
-    await authService.changePassword(user.login, newPassword);
+    await authService.changePassword(user.email, newPassword);
     res.sendStatus(HttpStatus.NoContent);
   } catch (error) {
     next(error);

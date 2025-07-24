@@ -60,9 +60,9 @@ export class UsersRepository {
     );
     return result.modifiedCount === 1;
   }
-  async setNewPassword(login: string, newPassword: string): Promise<Boolean> {
+  async setNewPassword(email: string, newPassword: string): Promise<Boolean> {
     const result = await UserModel.updateOne(
-      { login: login },
+      { email: email },
       { $set: { passwordHash: newPassword } },
     );
     return result.modifiedCount === 1;

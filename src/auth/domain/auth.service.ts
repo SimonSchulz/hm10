@@ -69,8 +69,8 @@ export class AuthService {
 
     return id;
   }
-  async changePassword(login: string, newPassword: string): Promise<Boolean> {
+  async changePassword(email: string, newPassword: string): Promise<Boolean> {
     const passwordHash = await this.bcryptService.generateHash(newPassword);
-    return await this.usersRepository.setNewPassword(login, passwordHash);
+    return await this.usersRepository.setNewPassword(email, passwordHash);
   }
 }
