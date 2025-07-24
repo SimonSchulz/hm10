@@ -75,11 +75,13 @@ authRouter.post(
   requestLogMiddleware,
   newPasswordValidation,
   recoveryCodeValidation,
+  inputValidationResultMiddleware,
   newPasswordHandler,
 );
 authRouter.post(
   "/password-recovery",
   requestLogMiddleware,
   recoveryPasswordEmailValidation,
+  inputValidationResultMiddleware,
   passwordRecoveryHandler,
 );

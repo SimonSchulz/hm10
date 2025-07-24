@@ -20,7 +20,12 @@ export async function newPasswordHandler(
     const newPassword = req.body.newPassword;
     const user = await usersQueryRepository.findByRecoveryCode(code);
     if (!user) {
-      throw new ValidationError();
+      res.status(400).send({
+        errorsMessages: [
+          { message: "Invalid recovery code", field: "recoveryCode" },
+        ],
+      });
+      return;
     }
     await authService.changePassword(user.login, newPassword);
     res.sendStatus(HttpStatus.NoContent);
