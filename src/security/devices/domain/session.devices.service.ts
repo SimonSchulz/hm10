@@ -1,22 +1,33 @@
 import { DeviceSessionEntity } from "../types/device-session.entity";
 import { SessionDevicesRepository } from "../repositories/session-devices.repository";
-import { WithId } from "mongodb";
 import { SessionDevicesQueryRepository } from "../repositories/session-query.repository";
+import { injectable } from "inversify/lib/esm";
+import { inject } from "inversify";
+import TYPES from "../../../core/container/types";
 
-export const sessionDevicesService = {
-  async getAllSessions(userId: string): Promise<WithId<DeviceSessionEntity>[]> {
-    return SessionDevicesQueryRepository.findAllByUserId(userId);
-  },
+@injectable()
+export class SessionDevicesService {
+  constructor(
+    @inject(TYPES.SessionDevicesRepository)
+    private readonly repository: SessionDevicesRepository,
+    @inject(TYPES.SessionDevicesQueryRepository)
+    private readonly queryRepository: SessionDevicesQueryRepository,
+  ) {}
+
+  async getAllSessions(userId: string): Promise<DeviceSessionEntity[]> {
+    return this.queryRepository.findAllByUserId(userId);
+  }
 
   async getSessionByDeviceId(
     deviceId: string,
-  ): Promise<WithId<DeviceSessionEntity> | null> {
-    return SessionDevicesQueryRepository.findSessionByDeviceId(deviceId);
-  },
+  ): Promise<DeviceSessionEntity | null> {
+    return this.queryRepository.findSessionByDeviceId(deviceId);
+  }
 
-  async updateLastActiveDate(deviceId: string, iat: string) {
-    await SessionDevicesRepository.updateLastActiveDate(deviceId, iat);
-  },
+  async updateLastActiveDate(deviceId: string, iat: string): Promise<void> {
+    await this.repository.updateLastActiveDate(deviceId, iat);
+  }
+
   async createSession(
     ip: string,
     title: string,
@@ -25,16 +36,17 @@ export const sessionDevicesService = {
     iat: string,
   ): Promise<DeviceSessionEntity> {
     const session = new DeviceSessionEntity(ip, title, userId, deviceId, iat);
-    return SessionDevicesRepository.create(session);
-  },
+    return this.repository.create(session);
+  }
+
   async deleteOtherSessions(
     userId: string,
     currentDeviceId: string,
   ): Promise<void> {
-    await SessionDevicesRepository.deleteAllExcept(userId, currentDeviceId);
-  },
+    await this.repository.deleteAllExcept(userId, currentDeviceId);
+  }
 
   async deleteSessionByDeviceId(deviceId: string): Promise<boolean> {
-    return SessionDevicesRepository.deleteByDeviceId(deviceId);
-  },
-};
+    return this.repository.deleteByDeviceId(deviceId);
+  }
+}

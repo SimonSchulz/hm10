@@ -1,33 +1,30 @@
-import {commentCollection } from "../../db/mongodb";
-import {ObjectId, WithId} from "mongodb";
-import {Comment} from "../types/comment";
-import {CommentQueryInput} from "../types/comment-query.input";
+import { CommentModel } from "../schemas/comment.schema"; // путь к твоей схеме комментария
+import { CommentQueryInput } from "../types/comment-query.input";
+import { Types } from "mongoose";
 
 export const commentsQueryRepository = {
-    async findByIdOrFail(id: string):  Promise<WithId<Comment> | null>  {
-        return commentCollection.findOne({_id: new ObjectId(id)});
-    },
-    async findCommentsByPostId(postId: string, queryDto: CommentQueryInput): Promise<{ items: WithId<Comment>[], totalCount: number }> {
-        const {
-            pageNumber,
-            pageSize,
-            sortBy,
-            sortDirection,
-        } = queryDto;
+  async findByIdOrFail(id: string) {
+    if (!Types.ObjectId.isValid(id)) return null;
+    return CommentModel.findById(id).lean();
+  },
 
-        const skip = (pageNumber - 1) * pageSize;
+  async findCommentsByPostId(
+    postId: string,
+    queryDto: CommentQueryInput,
+  ): Promise<{ items: any[]; totalCount: number }> {
+    const { pageNumber, pageSize, sortBy, sortDirection } = queryDto;
+    const skip = (pageNumber - 1) * pageSize;
 
-        const filter = { postId };
+    const filter = { postId };
 
-        const items = await commentCollection
-            .find(filter)
-            .sort({ [sortBy]: sortDirection })
-            .skip(skip)
-            .limit(pageSize)
-            .toArray();
+    const items = await CommentModel.find(filter)
+      .sort({ [sortBy]: sortDirection === "asc" ? 1 : -1 })
+      .skip(skip)
+      .limit(pageSize)
+      .lean();
 
-        const totalCount = await commentCollection.countDocuments(filter);
+    const totalCount = await CommentModel.countDocuments(filter);
 
-        return { items, totalCount };
-    },
+    return { items, totalCount };
+  },
 };

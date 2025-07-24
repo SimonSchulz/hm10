@@ -1,24 +1,22 @@
 import { Router, Request, Response } from "express";
 import { HttpStatus } from "../core/types/http-statuses";
-import {
-  blogCollection,
-  commentCollection,
-  postCollection,
-  requestLogsCollection,
-  sessionDevicesCollection,
-  userCollection,
-} from "../db/mongodb";
+import { BlogModel } from "../blogs/schemas/blog.schema";
+import { PostModel } from "../posts/schemas/post.schema";
+import { UserModel } from "../user/schemas/user.schema";
+import { CommentModel } from "../comments/schemas/comment.schema";
+import { RequestLogModel } from "../auth/schemas/request-log.schema";
+import { DeviceSessionModel } from "../security/devices/schemas/device-session.schema";
 
-export const testingRouter = Router({});
+export const testingRouter = Router();
 
 testingRouter.delete("/all-data", async (req: Request, res: Response) => {
   await Promise.all([
-    blogCollection.deleteMany(),
-    postCollection.deleteMany(),
-    userCollection.deleteMany(),
-    commentCollection.deleteMany(),
-    sessionDevicesCollection.deleteMany(),
-    requestLogsCollection.deleteMany(),
+    BlogModel.deleteMany({}),
+    PostModel.deleteMany({}),
+    UserModel.deleteMany({}),
+    CommentModel.deleteMany({}),
+    DeviceSessionModel.deleteMany({}),
+    RequestLogModel.deleteMany({}),
   ]);
   res.sendStatus(HttpStatus.NoContent);
 });

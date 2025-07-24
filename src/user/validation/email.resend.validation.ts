@@ -1,6 +1,9 @@
 import { body } from "express-validator";
-import { usersRepository } from "../repositories/user.repository";
+import container from "../../core/container/container";
+import TYPES from "../../core/container/types";
+import { UsersRepository } from "../repositories/user.repository";
 
+const usersRepository = container.get<UsersRepository>(TYPES.UsersRepository);
 export const emailResendValidation = body("email")
   .isString()
   .trim()

@@ -1,11 +1,17 @@
-import { usersRepository } from "../../../user/repositories/user.repository";
 import { addMinutes } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../../../core/types/http-statuses";
-import { nodemailerService } from "../../domain/nodemailer.service";
 import { emailExamples } from "../../utils/email-messages";
 import crypto from "crypto";
+import container from "../../../core/container/container";
+import { UsersRepository } from "../../../user/repositories/user.repository";
+import TYPES from "../../../core/container/types";
+import { NodemailerService } from "../../domain/nodemailer.service";
 
+const usersRepository = container.get<UsersRepository>(TYPES.UsersRepository);
+const nodemailerService = container.get<NodemailerService>(
+  TYPES.NodemailerService,
+);
 export async function resendConfirmationEmail(
   req: Request<{}, {}, { email: string }>,
   res: Response,

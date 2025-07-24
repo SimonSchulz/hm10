@@ -1,11 +1,19 @@
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../../../core/types/http-statuses";
 import { LoginDto } from "../../dto/login.dto";
-import { authService } from "../../domain/auth.service";
 import { AuthorizationError } from "../../../core/utils/app-response-errors";
 import { LoginSuccessViewModel } from "../../types/login-success-view-model";
-import { sessionDevicesService } from "../../../security/devices/domain/session.devices.service";
-import { jwtService } from "../../domain/jwt.service";
+import container from "../../../core/container/container";
+import TYPES from "../../../core/container/types";
+import { AuthService } from "../../domain/auth.service";
+import { JwtService } from "../../domain/jwt.service";
+import { SessionDevicesService } from "../../../security/devices/domain/session.devices.service";
+
+const authService = container.get<AuthService>(TYPES.AuthService);
+const jwtService = container.get<JwtService>(TYPES.JwtService);
+const sessionDevicesService = container.get<SessionDevicesService>(
+  TYPES.SessionDevicesService,
+);
 
 export async function authLoginHandler(
   req: Request<{}, {}, LoginDto>,

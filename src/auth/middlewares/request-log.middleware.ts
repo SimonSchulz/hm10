@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { requestLogsCollection } from "../../db/mongodb";
 import { HttpStatus } from "../../core/types/http-statuses";
+import { RequestLogModel } from "../schemas/request-log.schema";
 
 export const requestLogMiddleware = async (
   req: Request,
@@ -12,8 +12,8 @@ export const requestLogMiddleware = async (
     const url = req.originalUrl;
     const now = new Date();
     const tenSecondsAgo = new Date(now.getTime() - 10 * 1000);
-    await requestLogsCollection.insertOne({ ip, url, date: now });
-    const count = await requestLogsCollection.countDocuments({
+    await new RequestLogModel({ ip, url, date: now }).save();
+    const count = await RequestLogModel.countDocuments({
       ip,
       url,
       date: { $gte: tenSecondsAgo },

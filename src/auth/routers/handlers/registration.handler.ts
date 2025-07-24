@@ -1,11 +1,20 @@
 import { Request, Response, NextFunction } from "express";
-import { authService } from "../../domain/auth.service";
 import { HttpStatus } from "../../../core/types/http-statuses";
 import { ValidationError } from "../../../core/utils/app-response-errors";
-import { usersRepository } from "../../../user/repositories/user.repository";
 import { emailExamples } from "../../utils/email-messages";
-import { nodemailerService } from "../../domain/nodemailer.service";
+import container from "../../../core/container/container";
+import { AuthService } from "../../domain/auth.service";
+import TYPES from "../../../core/container/types";
+import { JwtService } from "../../domain/jwt.service";
+import { SessionDevicesService } from "../../../security/devices/domain/session.devices.service";
+import { UsersRepository } from "../../../user/repositories/user.repository";
+import { NodemailerService } from "../../domain/nodemailer.service";
 
+const authService = container.get<AuthService>(TYPES.AuthService);
+const usersRepository = container.get<UsersRepository>(TYPES.UsersRepository);
+const nodemailerService = container.get<NodemailerService>(
+  TYPES.NodemailerService,
+);
 export async function registrationHandler(
   req: Request,
   res: Response,

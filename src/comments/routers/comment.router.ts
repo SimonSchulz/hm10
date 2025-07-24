@@ -5,16 +5,20 @@ import { contentValidation } from "../validation/comment.input-dto.validation";
 import { deleteCommentHandler } from "./handlers/delete-comment-handler";
 import { updateCommentHandler } from "./handlers/update-comment-handler";
 import { getCommentHandler } from "./handlers/get-comment-handler";
-import { accessTokenGuard } from "../../auth/routers/guards/access.token.guard";
+import container from "../../core/container/container";
+import { AccessTokenGuard } from "../../auth/routers/guards/access.token.guard";
+import TYPES from "../../core/container/types";
 
 export const commentsRouter = Router({});
-
+const accessTokenGuard = container.get<AccessTokenGuard>(
+  TYPES.AccessTokenGuard,
+);
 commentsRouter
   .get("/:id", idValidation, inputValidationResultMiddleware, getCommentHandler)
 
   .put(
     "/:id",
-    accessTokenGuard,
+    accessTokenGuard.handle,
     idValidation,
     contentValidation,
     inputValidationResultMiddleware,
@@ -23,7 +27,7 @@ commentsRouter
 
   .delete(
     "/:id",
-    accessTokenGuard,
+    accessTokenGuard.handle,
     idValidation,
     inputValidationResultMiddleware,
     deleteCommentHandler,

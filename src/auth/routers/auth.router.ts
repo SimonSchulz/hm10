@@ -1,9 +1,8 @@
 import { Router } from "express";
 import { passwordValidation } from "../../user/validation/password.validation";
-import { loginOrEmailValidation } from "../../user/validation/login.or.emaol.validation";
+import { loginOrEmailValidation } from "../../user/validation/login.or.email.validation";
 import { inputValidationResultMiddleware } from "../../core/utils/input-validtion-result.middleware";
 import { authLoginHandler } from "./handlers/login.handler";
-import { accessTokenGuard } from "./guards/access.token.guard";
 import { getUserDataHandler } from "./handlers/get-user-data.handler";
 import { loginValidation } from "../../user/validation/login.validation";
 import { emailValidation } from "../../user/validation/email.validation";
@@ -15,10 +14,23 @@ import { emailResendValidation } from "../../user/validation/email.resend.valida
 import { refreshTokenHandler } from "./handlers/refresh.handler";
 import { logoutHandler } from "./handlers/logout.handler";
 import { requestLogMiddleware } from "../middlewares/request-log.middleware";
-import { refreshTokenGuard } from "./guards/refresh.token.guard";
+import container from "../../core/container/container";
+import { RefreshTokenGuard } from "./guards/refresh.token.guard";
+import TYPES from "../../core/container/types";
+import { AccessTokenGuard } from "./guards/access.token.guard";
+import { newPasswordValidation } from "../../user/validation/new-password.validation";
+import { recoveryPasswordEmailValidation } from "../../user/validation/recovery-password-email.validation";
+import { recoveryCodeValidation } from "../../user/validation/password-recovery-code.validation";
+import { passwordRecoveryHandler } from "./handlers/password-recovery.handler";
+import { newPasswordHandler } from "./handlers/new-password.handler";
 
 export const authRouter = Router();
-
+const refreshTokenGuard = container.get<RefreshTokenGuard>(
+  TYPES.RefreshTokenGuard,
+);
+const accessTokenGuard = container.get<AccessTokenGuard>(
+  TYPES.AccessTokenGuard,
+);
 authRouter.post(
   "/login",
   requestLogMiddleware,
@@ -50,6 +62,24 @@ authRouter.post(
   inputValidationResultMiddleware,
   resendConfirmationEmail,
 );
-authRouter.get("/me", accessTokenGuard, getUserDataHandler);
-authRouter.post("/refresh-token", refreshTokenGuard, refreshTokenHandler);
-authRouter.post("/logout", refreshTokenGuard, logoutHandler);
+authRouter.get("/me", accessTokenGuard.handle, getUserDataHandler);
+authRouter.post(
+  "/refresh-token",
+  refreshTokenGuard.handle,
+  refreshTokenHandler,
+);
+authRouter.post("/logout", refreshTokenGuard.handle, logoutHandler);
+
+authRouter.post(
+  "/new-password",
+  requestLogMiddleware,
+  newPasswordValidation,
+  recoveryCodeValidation,
+  newPasswordHandler,
+);
+authRouter.post(
+  "/password-recovery",
+  requestLogMiddleware,
+  recoveryPasswordEmailValidation,
+  passwordRecoveryHandler,
+);

@@ -1,30 +1,38 @@
 import { DeviceSessionEntity } from "../types/device-session.entity";
-import { sessionDevicesCollection } from "../../../db/mongodb";
+import { DeviceSessionModel } from "../schemas/device-session.schema";
+import { injectable } from "inversify/lib/esm";
 
-export const SessionDevicesRepository = {
+@injectable()
+export class SessionDevicesRepository {
   async create(
     sessionDevice: DeviceSessionEntity,
   ): Promise<DeviceSessionEntity> {
-    await sessionDevicesCollection.insertOne(sessionDevice);
-    return sessionDevice;
-  },
-  async updateLastActiveDate(deviceId: string, iat: string) {
-    await sessionDevicesCollection.updateOne(
+    const created = await DeviceSessionModel.create(sessionDevice);
+    return new DeviceSessionEntity(
+      created.ip,
+      created.title,
+      created.userId,
+      created.deviceId,
+      created.lastActiveDate,
+    );
+  }
+
+  async updateLastActiveDate(deviceId: string, iat: string): Promise<void> {
+    await DeviceSessionModel.updateOne(
       { deviceId },
       { $set: { lastActiveDate: iat } },
     );
-  },
+  }
+
   async deleteAllExcept(userId: string, deviceId: string): Promise<void> {
-    await sessionDevicesCollection.deleteMany({
+    await DeviceSessionModel.deleteMany({
       userId,
       deviceId: { $ne: deviceId },
     });
-  },
+  }
 
   async deleteByDeviceId(deviceId: string): Promise<boolean> {
-    const result = await sessionDevicesCollection.deleteOne({
-      deviceId,
-    });
+    const result = await DeviceSessionModel.deleteOne({ deviceId });
     return result.deletedCount === 1;
-  },
-};
+  }
+}

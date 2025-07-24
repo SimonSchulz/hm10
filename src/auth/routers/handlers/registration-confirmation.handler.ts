@@ -1,12 +1,14 @@
-import { usersRepository } from "../../../user/repositories/user.repository";
 import { ValidationError } from "../../../core/utils/app-response-errors";
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../../../core/types/http-statuses";
-
+import container from "../../../core/container/container";
+import { UsersRepository } from "../../../user/repositories/user.repository";
+import TYPES from "../../../core/container/types";
+const usersRepository = container.get<UsersRepository>(TYPES.UsersRepository);
 export async function confirmRegistration(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     const code = req.body.code;
@@ -14,7 +16,9 @@ export async function confirmRegistration(
 
     if (!user) {
       res.status(HttpStatus.BadRequest).send({
-        errorsMessages: [{ field: "code", message: "Invalid confirmation code" }],
+        errorsMessages: [
+          { field: "code", message: "Invalid confirmation code" },
+        ],
       });
       return;
     }
@@ -29,12 +33,14 @@ export async function confirmRegistration(
     const expirationDate = new Date(user.emailConfirmation.expirationDate);
     if (expirationDate < new Date()) {
       res.status(HttpStatus.BadRequest).send({
-        errorsMessages: [{ field: "code", message: "Confirmation code expired" }],
+        errorsMessages: [
+          { field: "code", message: "Confirmation code expired" },
+        ],
       });
       return;
     }
 
-    const success = await usersRepository.confirmUser(user._id.toString());
+    const success = await usersRepository.confirmEmail(user._id.toString());
     if (!success) {
       throw new ValidationError("Failed to confirm user");
     }

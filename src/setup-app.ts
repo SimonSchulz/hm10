@@ -12,12 +12,12 @@ import { postsRouter } from "./posts/routers/posts.router";
 import { blogsRouter } from "./blogs/routers/blogs.router";
 import { testingRouter } from "./testing/testing.router";
 import { errorHandlerMiddleware } from "./core/utils/error-handler-middleware";
-import { usersRouter } from "./user/routers/users.router";
 import { authRouter } from "./auth/routers/auth.router";
 import { commentsRouter } from "./comments/routers/comment.router";
 import { HttpStatus } from "./core/types/http-statuses";
 import cookieParser from "cookie-parser";
 import { sessionDevicesRouter } from "./security/devices/routes/session-devices.router";
+import { usersRouter } from "./user/routers/users.router";
 
 export const setupApp = (app: Express) => {
   app.use(express.json());

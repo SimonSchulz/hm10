@@ -1,42 +1,33 @@
-import { commentCollection } from "../../db/mongodb";
-import {ObjectId, WithId} from "mongodb";
-import {Comment} from "../types/comment";
-import { CommentInputDto} from "../dto/comment.input-dto";
+import { CommentModel } from "../schemas/comment.schema"; // путь к твоей схеме комментария
+import { CommentInputDto } from "../dto/comment.input-dto";
+import { Types } from "mongoose";
 
 export const commentsRepository = {
-    async findByIdOrFail(id: string):  Promise<WithId<Comment> | null>  {
-        return commentCollection.findOne({_id: new ObjectId(id)});
-    },
+  async findByIdOrFail(id: string) {
+    if (!Types.ObjectId.isValid(id)) return null;
+    return CommentModel.findById(id).lean();
+  },
 
-    async create(newComment: Comment): Promise<WithId<Comment>> {
-        const insertResult = await commentCollection.insertOne(newComment);
-        return { ...newComment, _id: insertResult.insertedId };
-    },
-    async delete(id: string): Promise <void> {
-        const deleteResult = await commentCollection.deleteOne({
-            _id: new ObjectId(id),
-        });
+  async create(newComment: any) {
+    const createdComment = await CommentModel.create(newComment);
+    return createdComment.toObject();
+  },
 
-        if (deleteResult.deletedCount < 1) {
-            throw new Error('Comment not exist');
-        }
-        return;
-    },
-    async update(id: string, dto: CommentInputDto): Promise<void> {
-        const updateResult = await commentCollection.updateOne(
-            {
-                _id: new ObjectId(id),
-            },
-            {
-                $set: {
-                    content: dto.content,
-                },
-            },
-        );
+  async delete(id: string): Promise<void> {
+    const result = await CommentModel.deleteOne({ _id: id });
+    if (result.deletedCount < 1) {
+      throw new Error("Comment not exist");
+    }
+  },
 
-        if (updateResult.matchedCount < 1) {
-            throw new Error('Post not exist');
-        }
-        return;
-    },
+  async update(id: string, dto: CommentInputDto): Promise<void> {
+    const result = await CommentModel.updateOne(
+      { _id: id },
+      { $set: { content: dto.content } },
+    );
+
+    if (result.matchedCount < 1) {
+      throw new Error("Comment not exist");
+    }
+  },
 };

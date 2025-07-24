@@ -1,8 +1,13 @@
 import { Response, Request } from "express";
 import { HttpStatus } from "../../../core/types/http-statuses";
-import { usersQueryRepository } from "../../../user/repositories/user.query.repository";
 import { AuthorizationError } from "../../../core/utils/app-response-errors";
+import container from "../../../core/container/container";
+import TYPES from "../../../core/container/types";
+import { UsersQueryRepository } from "../../../user/repositories/user.query.repository";
 
+const usersQueryRepository = container.get<UsersQueryRepository>(
+  TYPES.UsersQueryRepository,
+);
 export async function getUserDataHandler(req: Request, res: Response) {
   const userId = req.userInfo?.userId;
   if (!userId) {

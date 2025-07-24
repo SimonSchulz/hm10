@@ -1,15 +1,29 @@
 import { Router } from "express";
-import { getAllSessionsHandler } from "./handlers/get-all-sessions.handler";
-import { deleteDevicesByIdHandler } from "./handlers/delete-devices-by-id.handler";
-import { deleteOtherSessionsHandler } from "./handlers/delete-other-devices.handler";
-import { refreshTokenGuard } from "../../../auth/routers/guards/refresh.token.guard";
 
-export const sessionDevicesRouter = Router();
+import { DeviceSessionController } from "../controller/device-session.controller";
+import container from "../../../core/container/container";
+import { RefreshTokenGuard } from "../../../auth/routers/guards/refresh.token.guard";
+import TYPES from "../../../core/container/types";
 
-sessionDevicesRouter.get("/", refreshTokenGuard, getAllSessionsHandler);
-sessionDevicesRouter.delete("/", refreshTokenGuard, deleteOtherSessionsHandler);
-sessionDevicesRouter.delete(
-  "/:deviceId",
-  refreshTokenGuard,
-  deleteDevicesByIdHandler,
+const router = Router();
+const controller = container.get(DeviceSessionController);
+const refreshTokenGuard = container.get<RefreshTokenGuard>(
+  TYPES.RefreshTokenGuard,
 );
+router.get(
+  "/",
+  refreshTokenGuard.handle,
+  controller.getAllSessions.bind(controller),
+);
+router.delete(
+  "/",
+  refreshTokenGuard.handle,
+  controller.deleteOtherSessions.bind(controller),
+);
+router.delete(
+  "/:deviceId",
+  refreshTokenGuard.handle,
+  controller.deleteDevicesById.bind(controller),
+);
+
+export { router as sessionDevicesRouter };

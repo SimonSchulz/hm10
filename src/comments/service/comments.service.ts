@@ -7,7 +7,7 @@ import { commentsQueryRepository } from "../repositories/comment.query.repo";
 import { CommentQueryInput } from "../types/comment-query.input";
 
 export const commentsService = {
-  async findByIdOrFail(id: string): Promise<WithId<Comment> | null> {
+  async findByIdOrFail(id: string) {
     return commentsRepository.findByIdOrFail(id);
   },
   async findCommentsByPostId(
@@ -16,11 +16,7 @@ export const commentsService = {
   ): Promise<{ items: WithId<Comment>[]; totalCount: number }> {
     return commentsQueryRepository.findCommentsByPostId(postId, queryDto);
   },
-  async create(
-    dto: CommentInputDto,
-    info: RequestDataEntity,
-    postId: string,
-  ): Promise<WithId<Comment>> {
+  async create(dto: CommentInputDto, info: RequestDataEntity, postId: string) {
     console.log(info);
     const userInfo = {
       userId: info.userId,

@@ -1,13 +1,14 @@
-import { UserViewModel } from "../dto/user.view-model";
-import { userCollection } from "../../db/mongodb";
+import { injectable } from "inversify";
+import { UserModel } from "../schemas/user.schema";
 import { UserQueryInput } from "../types/user-query.input";
-import { ObjectId, WithId } from "mongodb";
 import { PaginatedOutput } from "../../core/types/paginated.output";
-import {User} from "../domain/user.entity";
-import {mapToUserViewModel} from "../routers/mappers/map-to-user-view-model";
+import { mapToUserViewModel } from "../routers/mappers/map-to-user-view-model";
+import { UserViewModel } from "../dto/user.view-model";
+import { UserDocument } from "../types/user.document.type";
 
-export const usersQueryRepository = {
-  async findAllUsers(sortQueryDto: UserQueryInput): Promise<PaginatedOutput> {
+@injectable()
+export class UsersQueryRepository {
+  async findAllUsers(query: UserQueryInput): Promise<PaginatedOutput> {
     const {
       sortBy,
       sortDirection,
@@ -15,40 +16,41 @@ export const usersQueryRepository = {
       pageNumber,
       searchLoginTerm,
       searchEmailTerm,
-    } = sortQueryDto;
+    } = query;
 
     const filter: any = {};
     if (searchLoginTerm && searchEmailTerm) {
       filter.$or = [
-        { login: { $regex: searchLoginTerm, $options: "i" } },
-        { email: { $regex: searchEmailTerm, $options: "i" } },
+        { login: new RegExp(searchLoginTerm, "i") },
+        { email: new RegExp(searchEmailTerm, "i") },
       ];
     } else if (searchLoginTerm) {
-      filter.login = { $regex: searchLoginTerm, $options: "i" };
+      filter.login = new RegExp(searchLoginTerm, "i");
     } else if (searchEmailTerm) {
-      filter.email = { $regex: searchEmailTerm, $options: "i" };
+      filter.email = new RegExp(searchEmailTerm, "i");
     }
 
-    const totalCount = await userCollection.countDocuments(filter);
+    const totalCount = await UserModel.countDocuments(filter);
 
-    const users = await userCollection
-      .find(filter)
-      .sort({ [sortBy]: sortDirection })
+    const users = await UserModel.find(filter)
+      .sort({ [sortBy]: sortDirection === "asc" ? 1 : -1 })
       .skip((pageNumber - 1) * pageSize)
-      .limit(pageSize)
-      .toArray();
+      .limit(pageSize);
 
     return {
       pagesCount: Math.ceil(totalCount / pageSize),
       page: pageNumber,
       pageSize: pageSize,
       totalCount,
-      items: users.map((u: WithId<User>) => mapToUserViewModel(u)),
+      items: users.map(mapToUserViewModel),
     };
-  },
-  async findById(id: string): Promise<UserViewModel | null> {
-    const user = await userCollection.findOne({ _id: new ObjectId(id) });
-    return user ? mapToUserViewModel(user) : null;
-  },
+  }
 
-};
+  async findById(id: string): Promise<UserViewModel | null> {
+    const user = await UserModel.findById(id);
+    return user ? mapToUserViewModel(user) : null;
+  }
+  async findByRecoveryCode(code: string): Promise<UserDocument | null> {
+    return UserModel.findOne({ "passwordRecovery.recoveryCode": code });
+  }
+}

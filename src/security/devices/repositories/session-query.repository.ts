@@ -1,16 +1,35 @@
+import { DeviceSessionModel } from "../schemas/device-session.schema";
 import { DeviceSessionEntity } from "../types/device-session.entity";
-import { sessionDevicesCollection } from "../../../db/mongodb";
-import { WithId } from "mongodb";
+import { injectable } from "inversify";
 
-export const SessionDevicesQueryRepository = {
-  async findAllByUserId(
-    userId: string,
-  ): Promise<WithId<DeviceSessionEntity>[]> {
-    return sessionDevicesCollection.find({ userId }).toArray();
-  },
+@injectable()
+export class SessionDevicesQueryRepository {
+  async findAllByUserId(userId: string): Promise<DeviceSessionEntity[]> {
+    const docs = await DeviceSessionModel.find({ userId }).lean();
+    return docs.map(
+      (doc) =>
+        new DeviceSessionEntity(
+          doc.ip,
+          doc.title,
+          doc.userId,
+          doc.deviceId,
+          doc.lastActiveDate,
+        ),
+    );
+  }
+
   async findSessionByDeviceId(
     deviceId: string,
-  ): Promise<WithId<DeviceSessionEntity> | null> {
-    return sessionDevicesCollection.findOne({ deviceId });
-  },
-};
+  ): Promise<DeviceSessionEntity | null> {
+    const doc = await DeviceSessionModel.findOne({ deviceId }).lean();
+    if (!doc) return null;
+
+    return new DeviceSessionEntity(
+      doc.ip,
+      doc.title,
+      doc.userId,
+      doc.deviceId,
+      doc.lastActiveDate,
+    );
+  }
+}

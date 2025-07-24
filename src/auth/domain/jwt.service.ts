@@ -2,19 +2,22 @@ import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { SETTINGS } from "../../core/setting/setting";
 import { ValidationError } from "../../core/utils/app-response-errors";
 import { randomUUID } from "crypto";
+import { injectable } from "inversify";
 
-export const jwtService = {
+@injectable()
+export class JwtService {
   async createAccessToken(userId: string): Promise<string> {
     return jwt.sign({ userId }, SETTINGS.AC_SECRET, {
       expiresIn: SETTINGS.AC_TIME as number,
     });
-  },
+  }
+
   async createRefreshToken(userId: string, deviceId?: string): Promise<string> {
-    const finalDeviceId = deviceId ?? randomUUID(); // если deviceId не передан — создаём новый
+    const finalDeviceId = deviceId ?? randomUUID();
     return jwt.sign({ userId, deviceId: finalDeviceId }, SETTINGS.RF_SECRET, {
       expiresIn: SETTINGS.RF_TIME as number,
     });
-  },
+  }
 
   async verifyAccessToken(token: string): Promise<{ userId: string } | null> {
     try {
@@ -28,7 +31,8 @@ export const jwtService = {
       }
       throw error;
     }
-  },
+  }
+
   async verifyRefreshToken(
     token: string,
   ): Promise<{ userId: string; deviceId: string } | null> {
@@ -46,17 +50,19 @@ export const jwtService = {
       }
       throw error;
     }
-  },
-  getTokenExpiration(token: string) {
+  }
+
+  getTokenExpiration(token: string): string {
     const decoded = jwt.decode(token) as { exp?: number } | null;
     if (!decoded || !decoded.exp)
       throw new ValidationError("Token expiration does not match");
     return new Date(decoded.exp * 1000).toISOString();
-  },
+  }
+
   getTokenIssuedAt(token: string): Date {
     const decoded = jwt.decode(token) as { iat?: number } | null;
     if (!decoded || !decoded.iat)
       throw new ValidationError("Token issuedAt does not match");
     return new Date(decoded.iat * 1000);
-  },
-};
+  }
+}
